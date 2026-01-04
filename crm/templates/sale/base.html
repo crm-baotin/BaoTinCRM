@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bảo Tín Finance</title>
+<style>
+body{margin:0;font-family:"Segoe UI",Arial;background:#f4f6fb}
+.header{
+  background:white;display:flex;justify-content:space-between;
+  align-items:center;padding:10px 24px;border-bottom:1px solid #ddd
+}
+.header-left{display:flex;align-items:center}
+.header-left img{height:34px;margin-right:10px}
+.header-right{font-weight:600;color:#0f4da2}
+.banner img{width:100%;max-height:260px;object-fit:cover}
+.container{padding:20px}
+.btn{background:#ff8c00;color:white;padding:6px 12px;border:none;border-radius:6px}
+.hidden{color:red;font-weight:bold}
+table{width:100%;background:white;border-collapse:collapse}
+th{background:#0f4da2;color:white;padding:10px}
+td{padding:8px;border-bottom:1px solid #eee}
+.filter{background:white;padding:16px;border-radius:12px;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="{% static 'crm/logo.png' %}">
+    <span>Bảo Tín Finance</span>
+  </div>
+  <div class="header-right">
+    {{ user.username }} | 0829 133 391
+    <a href="{% url 'sale_logout' %}" class="btn">Đăng xuất</a>
+  </div>
+</div>
+
+<div class="banner">
+  <img src="{% static 'crm/banner.jpg' %}">
+</div>
+
+<div class="container">
+{% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

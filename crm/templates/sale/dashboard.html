@@ -1,0 +1,218 @@
+{% extends "sale/base.html" %}
+{% block content %}
+
+<form class="filter" method="get">
+<b>BỘ LỌC</b><br><br>
+
+Tỉnh:
+<select name="province">
+<option value="">--Tất cả--</option>
+{% for p in provinces %}
+<option value="{{p}}" {% if request.GET.province == p %}selected{% endif %}>{{p}}</option>
+{% endfor %}
+</select>
+
+Công ty:
+<input name="company" value="{{ request.GET.company }}">
+
+Xsell:
+<select name="xsell">
+<option value="">--</option>
+<option value="1" {% if request.GET.xsell == "1" %}selected{% endif %}>Có</option>
+<option value="0" {% if request.GET.xsell == "0" %}selected{% endif %}>Không</option>
+</select>
+
+<br><br>
+
+Nợ xấu:
+<select name="bad_debt">
+<option value="">--</option>
+<option value="1" {% if request.GET.bad_debt == "1" %}selected{% endif %}>Có</option>
+<option value="0" {% if request.GET.bad_debt == "0" %}selected{% endif %}>Không</option>
+</select>
+
+Từ năm:
+<select name="bad_from">
+<option></option>
+{% for y in years %}
+<option value="{{y}}" {% if request.GET.bad_from == y|stringformat:"s" %}selected{% endif %}>{{y}}</option>
+{% endfor %}
+</select>
+
+Đến năm:
+<select name="bad_to">
+<option></option>
+{% for y in years %}
+<option value="{{y}}" {% if request.GET.bad_to == y|stringformat:"s" %}selected{% endif %}>{{y}}</option>
+{% endfor %}
+</select>
+
+<br><br>
+
+Trả chậm:
+<select name="late">
+<option value="">--</option>
+<option value="1" {% if request.GET.late == "1" %}selected{% endif %}>Có</option>
+<option value="0" {% if request.GET.late == "0" %}selected{% endif %}>Không</option>
+</select>
+
+Từ năm:
+<select name="late_from">
+<option></option>
+{% for y in years %}
+<option value="{{y}}" {% if request.GET.late_from == y|stringformat:"s" %}selected{% endif %}>{{y}}</option>
+{% endfor %}
+</select>
+
+Đến năm:
+<select name="late_to">
+<option></option>
+{% for y in years %}
+<option value="{{y}}" {% if request.GET.late_to == y|stringformat:"s" %}selected{% endif %}>{{y}}</option>
+{% endfor %}
+</select>
+
+<br><br>
+
+Giải ngân:
+<input type="date" name="dis_from" value="{{ request.GET.dis_from }}">
+→
+<input type="date" name="dis_to" value="{{ request.GET.dis_to }}">
+
+<br><br>
+
+Ngày nhập:
+<input type="date" name="created_from" value="{{ request.GET.created_from }}">
+→
+<input type="date" name="created_to" value="{{ request.GET.created_to }}">
+
+<br><br>
+
+<button class="btn">Lọc</button>
+<button class="btn" name="export" value="1">Xuất Excel</button>
+</form>
+
+<table>
+<tr>
+<th>Tên <a href="?order=name">▲</a> <a href="?order=-name">▼</a></th>
+
+<th>SĐT <a href="?order=phone">▲</a> <a href="?order=-phone">▼</a></th>
+
+<th>CCCD <a href="?order=cccd">▲</a> <a href="?order=-cccd">▼</a></th>
+
+<th>Ngày sinh <a href="?order=date_of_birth">▲</a> <a href="?order=-date_of_birth">▼</a></th>
+
+<th>Xsell <a href="?order=xsell_shb">▲</a> <a href="?order=-xsell_shb">▼</a></th>
+
+<th>Ngày GN <a href="?order=disbursement_date">▲</a> <a href="?order=-disbursement_date">▼</a></th>
+
+<th>Nợ xấu <a href="?order=bad_debt_year">▲</a> <a href="?order=-bad_debt_year">▼</a></th>
+
+<th>Trả chậm <a href="?order=late_payment_year">▲</a> <a href="?order=-late_payment_year">▼</a></th>
+
+<th>Tỉnh <a href="?order=province">▲</a> <a href="?order=-province">▼</a></th>
+
+<th>Công ty <a href="?order=company">▲</a> <a href="?order=-company">▼</a></th>
+
+<th>Ngày nhập <a href="?order=created_at">▲</a> <a href="?order=-created_at">▼</a></th>
+
+<th>Ghi chú</th>
+</tr>
+
+{% for c in customers %}
+<tr>
+<td>{{ c.name }}</td>
+
+<td>
+{% if request.user in c.sales.all %}
+  {{ c.phone }}
+{% else %}
+  <span class="hidden">BỊ ẨN</span>
+{% endif %}
+</td>
+
+<td>
+{% if request.user in c.sales.all %}
+  {{ c.cccd }}
+{% else %}
+  <span class="hidden">BỊ ẨN</span>
+{% endif %}
+</td>
+
+<td>
+{% if c.date_of_birth %}
+  {{ c.date_of_birth|date:"d/m/Y" }}
+{% else %}
+  -
+{% endif %}
+</td>
+
+<td>
+{% if c.xsell_shb %}
+  {% if c.disbursement_months >= 6 %}
+    <b style="color:orange">SHB</b>
+  {% elif c.disbursement_months >= 4 %}
+    <b style="color:green">SHB</b>
+  {% else %}
+    <b>SHB</b>
+  {% endif %}
+{% else %}-{% endif %}
+</td>
+
+<td>
+{% if c.disbursement_date %}
+  {% if c.disbursement_months >= 6 %}
+    <b style="color:orange">{{ c.disbursement_date|date:"d/m/Y" }}</b>
+  {% elif c.disbursement_months >= 4 %}
+    <b style="color:green">{{ c.disbursement_date|date:"d/m/Y" }}</b>
+  {% else %}
+    {{ c.disbursement_date|date:"d/m/Y" }}
+  {% endif %}
+{% else %}-{% endif %}
+</td>
+
+<td>
+{% if c.bad_debt %}
+  {% if c.bad_diff >= 5 %}
+    <b style="color:green">Có ({{c.bad_debt_year}})</b>
+  {% elif c.bad_diff >= 3 %}
+    <b style="color:orange">Có ({{c.bad_debt_year}})</b>
+  {% else %}
+    <b style="color:red">Có ({{c.bad_debt_year}})</b>
+  {% endif %}
+{% else %}
+  <span style="color:green">Không</span>
+{% endif %}
+</td>
+
+<td>
+{% if c.late_payment %}
+  {% if c.late_diff >= 5 %}
+    <b style="color:green">Có ({{c.late_payment_year}})</b>
+  {% elif c.late_diff >= 3 %}
+    <b style="color:orange">Có ({{c.late_payment_year}})</b>
+  {% else %}
+    <b style="color:red">Có ({{c.late_payment_year}})</b>
+  {% endif %}
+{% else %}
+  <span style="color:green">Không</span>
+{% endif %}
+</td>
+
+<td>{{ c.province }}</td>
+<td>{{ c.company }}</td>
+<td>{{ c.created_at|date:"d/m/Y" }}</td>
+
+<td>
+<form method="post" action="{% url 'save_note' c.id %}">
+  {% csrf_token %}
+  <textarea name="note" rows="2" style="width:160px">{{ c.note }}</textarea><br>
+  <button class="btn" style="margin-top:4px">Lưu</button>
+</form>
+</td>
+
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

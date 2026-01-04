@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+
+  {# GIỮ LẠI DANH SÁCH KHÁCH ĐÃ CHỌN #}
+  {% for obj in customers %}
+    <input type="hidden" name="_selected_action" value="{{ obj.pk }}">
+  {% endfor %}
+
+  {# 🔥 CỰC QUAN TRỌNG: TRUYỀN ACTION ĐÚNG #}
+  {% if "BỎ GÁN" in title %}
+    <input type="hidden" name="action" value="remove_sales_bulk">
+  {% else %}
+    <input type="hidden" name="action" value="assign_sales_bulk">
+  {% endif %}
+
+  <input type="hidden" name="apply" value="1">
+
+  <div style="margin-top:20px">
+    {% if "BỎ GÁN" in title %}
+      <input type="submit" value="Bỏ gán sale" class="deletelink">
+    {% else %}
+      <input type="submit" value="Gán sale" class="default">
+    {% endif %}
+  </div>
+</form>
+{% endblock %}
