@@ -24,8 +24,10 @@ SECRET_KEY = 'django-insecure-u6)rb87v7k*$j15!j8k(jan&t4z)13&#ex^#=w_-=coe*0#05z
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://baotincrm.onrender.com",
+]
+ALLOWED_HOSTS = ["baotincrm.onrender.com"]
 
 
 # Application definition
