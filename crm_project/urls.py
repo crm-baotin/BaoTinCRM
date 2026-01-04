@@ -1,11 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
-from crm.views import sale_login, sale_dashboard, sale_logout
+from django.shortcuts import redirect
 
 urlpatterns = [
-    path("login/", sale_login),
-    path("logout/", sale_logout),
-    path("dashboard/", sale_dashboard),
+    # ROOT /
+    path("", lambda request: redirect("/login/"), name="root"),
+
+    # ADMIN
     path("admin/", admin.site.urls),
-    path("", include("crm.urls")),   # 👈 BẮT BUỘC PHẢI CÓ
+
+    # CRM APP
+    path("", include("crm.urls")),
 ]
