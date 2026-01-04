@@ -8,5 +8,4 @@ urlpatterns = [
     path("dashboard/", sale_dashboard),
     path("admin/", admin.site.urls),
     path("", include("crm.urls")),   # 👈 BẮT BUỘC PHẢI CÓ
-    path("", root_redirect),          # ✅ THÊM DÒNG NÀY
 ]
