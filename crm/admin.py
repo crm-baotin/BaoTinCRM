@@ -9,7 +9,7 @@ from .models import Customer
 
 
 # ==================================================
-# FORM CHỌN SALE (DÙNG CHUNG)
+# FORM CHỌN SALE
 # ==================================================
 class AssignSaleForm(forms.Form):
     sales = forms.ModelMultipleChoiceField(
@@ -20,12 +20,12 @@ class AssignSaleForm(forms.Form):
 
 
 @admin.register(Customer)
-class CustomerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+class CustomerAdmin(ImportExportModelAdmin):
 
-    # ================= HIỂN THỊ CỘT =================
+    # ================= HIỂN THỊ =================
     list_display = (
         "name",
-        "date_of_birth",      # ✅ NGÀY SINH
+        "date_of_birth",
         "phone",
         "cccd",
         "xsell_display",
@@ -37,7 +37,7 @@ class CustomerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "created_at",
     )
 
-    # ================= BỘ LỌC =================
+    # ================= LỌC =================
     list_filter = (
         "province",
         "company",
@@ -46,7 +46,7 @@ class CustomerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         "bad_debt_year",
         "late_payment",
         "late_payment_year",
-        "date_of_birth",      # ✅ LỌC NGÀY SINH
+        "date_of_birth",
         "disbursement_date",
         "sales",
         "created_at",
@@ -55,24 +55,13 @@ class CustomerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # ================= TÌM KIẾM =================
     search_fields = ("name", "phone", "cccd", "company")
 
-    # ================= SORT MẶC ĐỊNH =================
-    ordering = (
-        "name",
-        "date_of_birth",      # ✅ SORT NGÀY SINH
-        "phone",              # ✅ SORT SĐT
-        "cccd",               # ✅ SORT CCCD
-    )
-
     filter_horizontal = ("sales",)
 
-    # 🔥 2 ACTION
-    actions = [
-        "assign_sales_bulk",
-        "remove_sales_bulk",
-    ]
+    # ================= ACTION =================
+    actions = ["assign_sales_bulk", "remove_sales_bulk"]
 
     # ==================================================
-    # 🔐 PHÂN QUYỀN ADMIN
+    # 🔐 PHÂN QUYỀN
     # ==================================================
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -99,7 +88,7 @@ class CustomerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     remove_sales_bulk.short_description = "Bỏ gán sale khỏi khách đã chọn (hàng loạt)"
 
     # ==================================================
-    # CORE HANDLER (DÙNG CHUNG)
+    # CORE HANDLER
     # ==================================================
     def _sale_bulk_handler(self, request, queryset, mode, title):
         if request.method == "POST" and "apply" in request.POST:

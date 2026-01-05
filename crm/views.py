@@ -5,9 +5,9 @@ from django.views.decorators.http import require_POST
 from datetime import date
 from .models import Customer
 from .exports import export_customers_excel
-from django.views.decorators.csrf import ensure_csrf_cookie
 
-# ================= LOGIN / LOGOUT =================
+
+# ================= LOGIN =================
 def sale_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -23,6 +23,7 @@ def sale_login(request):
     return render(request, "login.html")
 
 
+# ================= LOGOUT =================
 def sale_logout(request):
     logout(request)
     return redirect("/login/")
@@ -45,10 +46,10 @@ def sale_dashboard(request):
         qs = qs.filter(company__icontains=f["company"])
 
     if f.get("xsell") in ["0", "1"]:
-        qs = qs.filter(xsell_shb=bool(int(f["xsell"])))
+        qs = qs.filter(xsell_shb=bool(int(f["xsell"])) )
 
     if f.get("bad_debt") in ["0", "1"]:
-        qs = qs.filter(bad_debt=bool(int(f["bad_debt"])))
+        qs = qs.filter(bad_debt=bool(int(f["bad_debt"])) )
 
     if f.get("bad_from"):
         qs = qs.filter(bad_debt_year__gte=int(f["bad_from"]))
@@ -57,7 +58,7 @@ def sale_dashboard(request):
         qs = qs.filter(bad_debt_year__lte=int(f["bad_to"]))
 
     if f.get("late") in ["0", "1"]:
-        qs = qs.filter(late_payment=bool(int(f["late"])))
+        qs = qs.filter(late_payment=bool(int(f["late"])) )
 
     if f.get("late_from"):
         qs = qs.filter(late_payment_year__gte=int(f["late_from"]))
@@ -79,7 +80,7 @@ def sale_dashboard(request):
     if f.get("created_to"):
         qs = qs.filter(created_at__lte=f["created_to"])
 
-    # ===== SORT (ĐÃ THÊM SĐT / CCCD / NGÀY SINH) =====
+    # ===== SORT =====
     ALLOW_ORDER = [
         "name",
         "phone",
@@ -98,9 +99,11 @@ def sale_dashboard(request):
     if order and order.lstrip("-") in ALLOW_ORDER:
         qs = qs.order_by(order)
 
-    # ===== LOGIC MÀU =====
+    # ===== LOGIC MÀU + TELE SAFE =====
     today = date.today()
-    for c in qs:
+    customers = list(qs)
+
+    for c in customers:
         c.disbursement_months = (
             (today - c.disbursement_date).days // 30
             if c.disbursement_date else None
@@ -116,7 +119,7 @@ def sale_dashboard(request):
 
     # ===== EXPORT =====
     if "export" in f:
-        return export_customers_excel(qs)
+        return export_customers_excel(customers)
 
     provinces = Customer.objects.values_list("province", flat=True).distinct()
     years = range(today.year, today.year - 15, -1)
@@ -125,7 +128,7 @@ def sale_dashboard(request):
         request,
         "sale/dashboard.html",
         {
-            "customers": qs,
+            "customers": customers,
             "provinces": provinces,
             "years": years,
             "request": request,
@@ -134,11 +137,15 @@ def sale_dashboard(request):
 
 
 # ================= SAVE NOTE =================
-@ensure_csrf_cookie
 @login_required(login_url="/login/")
 @require_POST
 def save_note(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
+
+    # ❗ chỉ cho sale được gán mới sửa
+    if request.user not in customer.sales.all():
+        return redirect("/dashboard/")
+
     customer.note = request.POST.get("note", "")
     customer.save()
     return redirect("/dashboard/")
