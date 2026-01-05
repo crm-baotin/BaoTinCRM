@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 from datetime import date
 from .models import Customer
 from .exports import export_customers_excel
+from .telegram import check_and_notify_6_months
 
 
 # ================= LOGIN =================
@@ -33,7 +34,11 @@ def sale_logout(request):
 @login_required(login_url="/login/")
 def sale_dashboard(request):
     if request.user.is_superuser:
+        check_and_notify_6_months()
+
         return redirect("/admin/")
+    check_and_notify_6_months()
+
 
     qs = Customer.objects.all().distinct()
     f = request.GET
