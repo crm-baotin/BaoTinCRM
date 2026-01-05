@@ -29,7 +29,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 ALLOWED_HOSTS = ["baotincrm.onrender.com"]
 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
 # Application definition
 
 INSTALLED_APPS = [

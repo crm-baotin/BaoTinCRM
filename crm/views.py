@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from datetime import date
 from .models import Customer
 from .exports import export_customers_excel
-
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # ================= LOGIN / LOGOUT =================
 def sale_login(request):
@@ -134,6 +134,7 @@ def sale_dashboard(request):
 
 
 # ================= SAVE NOTE =================
+@ensure_csrf_cookie
 @login_required(login_url="/login/")
 @require_POST
 def save_note(request, pk):
