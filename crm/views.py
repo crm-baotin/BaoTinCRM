@@ -3,9 +3,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from datetime import date
+
 from .models import Customer
 from .exports import export_customers_excel
-from .telegram import check_and_notify_6_months
 
 
 # ================= LOGIN =================
@@ -34,11 +34,7 @@ def sale_logout(request):
 @login_required(login_url="/login/")
 def sale_dashboard(request):
     if request.user.is_superuser:
-        check_and_notify_6_months()
-
         return redirect("/admin/")
-    check_and_notify_6_months()
-
 
     qs = Customer.objects.all().distinct()
     f = request.GET
@@ -51,10 +47,10 @@ def sale_dashboard(request):
         qs = qs.filter(company__icontains=f["company"])
 
     if f.get("xsell") in ["0", "1"]:
-        qs = qs.filter(xsell_shb=bool(int(f["xsell"])) )
+        qs = qs.filter(xsell_shb=bool(int(f["xsell"])))
 
     if f.get("bad_debt") in ["0", "1"]:
-        qs = qs.filter(bad_debt=bool(int(f["bad_debt"])) )
+        qs = qs.filter(bad_debt=bool(int(f["bad_debt"])))
 
     if f.get("bad_from"):
         qs = qs.filter(bad_debt_year__gte=int(f["bad_from"]))
@@ -63,7 +59,7 @@ def sale_dashboard(request):
         qs = qs.filter(bad_debt_year__lte=int(f["bad_to"]))
 
     if f.get("late") in ["0", "1"]:
-        qs = qs.filter(late_payment=bool(int(f["late"])) )
+        qs = qs.filter(late_payment=bool(int(f["late"])))
 
     if f.get("late_from"):
         qs = qs.filter(late_payment_year__gte=int(f["late_from"]))
@@ -71,14 +67,12 @@ def sale_dashboard(request):
     if f.get("late_to"):
         qs = qs.filter(late_payment_year__lte=int(f["late_to"]))
 
-    # ===== GIẢI NGÂN =====
     if f.get("dis_from"):
         qs = qs.filter(disbursement_date__gte=f["dis_from"])
 
     if f.get("dis_to"):
         qs = qs.filter(disbursement_date__lte=f["dis_to"])
 
-    # ===== NGÀY NHẬP =====
     if f.get("created_from"):
         qs = qs.filter(created_at__gte=f["created_from"])
 
@@ -104,7 +98,7 @@ def sale_dashboard(request):
     if order and order.lstrip("-") in ALLOW_ORDER:
         qs = qs.order_by(order)
 
-    # ===== LOGIC MÀU + TELE SAFE =====
+    # ===== LOGIC MÀU =====
     today = date.today()
     customers = list(qs)
 
@@ -122,9 +116,8 @@ def sale_dashboard(request):
             if c.late_payment and c.late_payment_year else None
         )
 
-    # ===== EXPORT =====
     if "export" in f:
-        return export_customers_excel(customers)
+        return export_customers_excel(qs)
 
     provinces = Customer.objects.values_list("province", flat=True).distinct()
     years = range(today.year, today.year - 15, -1)
@@ -147,7 +140,6 @@ def sale_dashboard(request):
 def save_note(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
 
-    # ❗ chỉ cho sale được gán mới sửa
     if request.user not in customer.sales.all():
         return redirect("/dashboard/")
 

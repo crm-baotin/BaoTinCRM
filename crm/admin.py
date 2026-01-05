@@ -37,6 +37,9 @@ class CustomerAdmin(ImportExportModelAdmin):
         "created_at",
     )
 
+    # ✅ thêm ordering để admin không báo warning
+    ordering = ("-created_at",)
+
     # ================= LỌC =================
     list_filter = (
         "province",
